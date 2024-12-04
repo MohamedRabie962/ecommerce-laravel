@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('image')->nullable();
             $table->boolean('is_active')->default(1);
+            $table->unsignedBigInteger('category_id')->nullable()->change();
             $table->timestamps();
         });
     }
