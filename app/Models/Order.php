@@ -10,7 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = ['user_id', 'grand_total', 'payment_method', 'payment_status','status',
-        'currency','shipping_amount' ,'shipping_method','notes'];
+        'currency','shipping_amount' ,'shipping_method' , 'street_address' , 'notes'];
 
     public function user(){
         return $this->belongsTo(User::class);
@@ -22,5 +22,13 @@ class Order extends Model
 
     public function address(){
         return $this->belongsTo(Address::class);
+    }
+    protected static function booted()
+    {
+        static::saving(function ($order) {
+            if ($order->address_id) {
+                $order->address()->associate(Address::find($order->address_id));
+            }
+        });
     }
 }

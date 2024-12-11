@@ -18,6 +18,32 @@ class AddressRelationManager extends RelationManager
     {
         return $form
             ->schema([
+
+                Forms\Components\TextInput::make('first_name')
+                ->required()
+                ->maxLength(255),
+
+                Forms\Components\TextInput::make('last_name')
+                ->required()
+                ->maxLength(255),
+
+                Forms\Components\TextInput::make('phone')
+                ->required()
+                ->tel(25),
+
+                Forms\Components\TextInput::make('city')
+                ->required()
+                ->maxLength(255),
+
+                Forms\Components\TextInput::make('state')
+                ->required()
+                ->maxLength(255),
+
+                Forms\Components\TextInput::make('zip')
+                ->required()
+                ->numeric(15),
+
+
                 Forms\Components\TextInput::make('street_address')
                     ->required()
                     ->maxLength(255),
@@ -29,6 +55,12 @@ class AddressRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('street_address')
             ->columns([
+                Tables\Columns\TextColumn::make('first_name'),
+                Tables\Columns\TextColumn::make('last_name'),
+                Tables\Columns\TextColumn::make('phone'),
+                Tables\Columns\TextColumn::make('city'),
+                Tables\Columns\TextColumn::make('state'),
+                Tables\Columns\TextColumn::make('zip'),
                 Tables\Columns\TextColumn::make('street_address'),
             ])
             ->filters([

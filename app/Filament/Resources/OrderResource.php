@@ -170,7 +170,11 @@ class OrderResource extends Resource
                             }),
 
                         Forms\Components\Hidden::make('grand_total')
-                        ->default(0)
+                        ->default(0),
+
+
+
+
                     ])
                 ])->columnSpanFull()
             ]);
@@ -226,6 +230,11 @@ class OrderResource extends Resource
                 ->dateTime()
                 ->toggleable(isToggledHiddenByDefault: true),
 
+                Forms\Components\Select::make('address_id')
+                    ->label('Address')
+                    ->relationship('address', 'street_address')
+                    ->searchable()
+                    ->required(),
 
             ])
             ->filters([
@@ -248,9 +257,10 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\AddressRelationManager::class
         ];
     }
+
 
     public static function getNavigationBadge(): ?string{
         return static ::getmodel()::count();

@@ -18,4 +18,5 @@ class Address extends Model
     public function getFullAddressAttribute(){
         return "{{ $this->>firstName }}, {{ $this->>lastName }}";
     }
+
 }
