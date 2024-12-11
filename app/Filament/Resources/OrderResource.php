@@ -6,6 +6,11 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use App\Models\Product;
+use Faker\Core\Number;
+use Filament\Actions\ActionGroup;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -136,14 +141,36 @@ class OrderResource extends Resource
                             ->numeric()
                             ->required()
                             ->disabled()
+                            ->dehydrated()
                             ->columnSpan(3),
 
                             TextInput::make('total_amount')
                             ->numeric()
                             ->required()
+                            ->dehydrated()
                             ->columnSpan(3),
 
                         ])->columns(12),
+                        Forms\Components\Placeholder::make('grand_total_placeholder')
+                        ->label('Grand Total')
+                            ->content(function (Get $get, Set $set) {
+                                $total = 0;
+
+                                if (!$repeaters = $get('items')) {
+                                    $set('grand_total', $total);
+                                    return number_format($total, 2) . ' INR';
+                                }
+
+                                foreach ($repeaters as $key => $repeater) {
+                                    $total += $get("items.{$key}.total_amount");
+                                }
+
+                                $set('grand_total', $total);
+                                return number_format($total, 2) . ' INR'; // Formats total with 2 decimal places
+                            }),
+
+                        Forms\Components\Hidden::make('grand_total')
+                        ->default(0)
                     ])
                 ])->columnSpanFull()
             ]);
@@ -152,12 +179,52 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([ Tables\Columns\TextColumn::make('name')
+            ->columns([ Tables\Columns\TextColumn::make('user.name')  // Correct reference to 'user.name'
+                ->label('Customer')
                 ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('grand_total')
+                 ->numeric()
+                 ->sortable()
+                 ->searchable(),
+
+                Tables\Columns\TextColumn::make('payment_method')
+                ->searchable()
+                ->sortable(),
+
+                Tables\Columns\TextColumn::make('payment_status')
+                ->searchable()
+                ->sortable(),
+
+                Tables\Columns\TextColumn::make('currency')
+                ->sortable()
+                ->searchable(),
+
+                Tables\Columns\TextColumn::make('shipping_method')
+                ->searchable()
+                ->sortable(),
+
+
+                Tables\Columns\SelectColumn::make('status')
+                  ->options([
+                      'new' => 'New',
+                      'processing' => 'Processing',
+                      'canceled' => 'Canceled',
+                      'shipped' => 'Shipped',
+                      'delivered' => 'Delivered',
+                  ])
+                  ->searchable()
+                  ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->sortable(),
+                    ->sortable()
+                    ->dateTime()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('updated_at')
+                ->sortable()
+                ->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true),
 
 
             ])
@@ -165,8 +232,11 @@ class OrderResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -181,6 +251,14 @@ class OrderResource extends Resource
             //
         ];
     }
+
+    public static function getNavigationBadge(): ?string{
+        return static ::getmodel()::count();
+    }
+
+
+
+
 
     public static function getPages(): array
     {

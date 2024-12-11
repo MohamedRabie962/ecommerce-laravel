@@ -162,6 +162,9 @@ class ProductResource extends Resource
             // Add relations if needed
         ];
     }
+    public static function getNavigationBadge(): ?string{
+        return static ::getmodel()::count();
+    }
 
     public static function getPages(): array
     {
